@@ -1,0 +1,143 @@
+using UnityEngine;
+
+public class GunController : MonoBehaviour
+{
+    public float damage = 10.0f;
+    public float range = 100.0f;
+    public float fireRate = 0.5f;
+    public float impactForce = 30.0f;
+    public Camera fpsCam;
+    public ParticleSystem muzzleFlash;
+    public GameObject impactEffect;
+    public AudioSource gunshotSound;
+
+    private float nextTimeToFire = 0.0f;
+
+    void Update()
+    {
+        if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire)
+        {
+            nextTimeToFire = Time.time + 1.0f / fireRate;
+            Shoot();
+        }
+    }
+
+    void Shoot()
+    {
+        muzzleFlash.Play();
+        gunshotSound.Play();
+
+        RaycastHit hit;
+        if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
+        {
+            Debug.Log(hit.transform.name);
+
+            Target target = hit.transform.GetComponent<Target>();
+            if (target != null)
+            {
+                target.TakeDamage(damage);
+            }
+
+            if (hit.rigidbody != null)
+            {
+                hit.rigidbody.AddForce(-hit.normal * impactForce);
+            }
+
+            GameObject impact = Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
+            Destroy(impact, 2.0f);
+        }
+    }
+}
+
+Creating a first person shooter game involves a lot of complex systems and mechanics. However, I can provide you with a basic framework in Unity using C# that you can use as a starting point for your own FPS game.
+
+Create a new Unity project and create a new scene.
+Import your assets (including models, textures, and sound effects) into the project and add them to the scene.
+Create a new C# script called "PlayerController" and attach it to the player game object.
+csharp
+Copy code
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    public float moveSpeed = 5.0f;
+    public float jumpHeight = 2.0f;
+
+    private Rigidbody rb;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
+
+    void Update()
+    {
+        // Handle player movement
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        Vector3 movement = new Vector3(horizontal, 0.0f, vertical);
+        rb.AddForce(movement * moveSpeed);
+
+        // Handle player jumping
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
+        }
+    }
+}
+This script handles player movement and jumping using the player's Rigidbody component.
+
+Create a new C# script called "GunController" and attach it to the gun game object.
+csharp
+Copy code
+using UnityEngine;
+
+public class GunController : MonoBehaviour
+{
+    public float damage = 10.0f;
+    public float range = 100.0f;
+    public float fireRate = 0.5f;
+    public float impactForce = 30.0f;
+    public Camera fpsCam;
+    public ParticleSystem muzzleFlash;
+    public GameObject impactEffect;
+    public AudioSource gunshotSound;
+
+    private float nextTimeToFire = 0.0f;
+
+    void Update()
+    {
+        if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire)
+        {
+            nextTimeToFire = Time.time + 1.0f / fireRate;
+            Shoot();
+        }
+    }
+
+    void Shoot()
+    {
+        muzzleFlash.Play();
+        gunshotSound.Play();
+
+        RaycastHit hit;
+        if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
+        {
+            Debug.Log(hit.transform.name);
+
+            Target target = hit.transform.GetComponent<Target>();
+            if (target != null)
+            {
+                target.TakeDamage(damage);
+            }
+
+            if (hit.rigidbody != null)
+            {
+                hit.rigidbody.AddForce(-hit.normal * impactForce);
+            }
+
+            GameObject impact = Instantiate(impactEffect, hit.point, Quaternion.LookRotation(hit.normal));
+            Destroy(impact, 2.0f);
+        }
+    }
+}
+This script handles shooting using the Raycast function to detect if the player hits a target. The gun also has a muzzle flash effect, a gunshot sound effect, and an impact effect when hitting a target.
